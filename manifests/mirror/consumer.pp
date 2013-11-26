@@ -32,7 +32,8 @@ define kafka::mirror::consumer(
     $zookeeper_chroot                   = undef,
     $zookeeper_connection_timeout_ms    = 1000000,
     $consumer_group_id                  = "mirror${zookeeper_chroot}",
-    $consumer_properties_template       = 'kafka/consumer.properties.erb'
+    $consumer_properties_template       = 'kafka/consumer.properties.erb',
+    $config_dir                         = $kafka::defaults::kafka_config_dir
 )
 {
     # Kafka class must be included before kafka::mirror::consumer.
@@ -44,7 +45,7 @@ define kafka::mirror::consumer(
     # you want installed.
     require ::kafka
 
-    file { "/etc/kafka/mirror/consumer.${name}.properties":
+    file { "${config_dir}/mirror/consumer.${name}.properties":
         content => template($consumer_properties_template),
         before  => Service['kafka-mirror'],
     }

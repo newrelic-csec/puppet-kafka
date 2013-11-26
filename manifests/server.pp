@@ -82,6 +82,8 @@ class kafka::server(
     $brokers                         = $kafka::defaults::brokers,
     $log_dirs                        = $kafka::defaults::log_dirs,
 
+    $config_dir                      = $kafka::defaults::kafka_config_dir,
+
     $zookeeper_hosts                 = $kafka::defaults::zookeeper_hosts,
     $zookeeper_connection_timeout_ms = $kafka::defaults::zookeeper_connection_timeout_ms,
     $zookeeper_chroot                = $kafka::defaults::zookeeper_chroot,
@@ -139,7 +141,7 @@ class kafka::server(
     file { '/etc/default/kafka':
         content => template($default_template),
     }
-    file { '/etc/kafka/server.properties':
+    file { "${config_dir}/server.properties":
         content => template($server_properties_template),
     }
 
@@ -155,7 +157,7 @@ class kafka::server(
 
     # log4j configuration for Kafka daemon
     # process logs (this uses $kafka_log_dir).
-    file { '/etc/kafka/log4j.properties':
+    file { "${config_dir}/log4j.properties":
         content => template($log4j_properties_template),
     }
 
@@ -170,8 +172,8 @@ class kafka::server(
     service { 'kafka':
         ensure     => 'running',
         require    => [
-            File['/etc/kafka/server.properties'],
-            File['/etc/kafka/log4j.properties'],
+            File["${config_dir}/server.properties"],
+            File["${config_dir}/log4j.properties"],
             File['/etc/default/kafka'],
             File[$log_dirs],
         ],

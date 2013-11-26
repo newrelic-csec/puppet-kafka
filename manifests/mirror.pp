@@ -17,6 +17,8 @@ class kafka::mirror(
     $enabled                               = true,
     $destination_brokers                   = $kafka::defaults::brokers,
 
+    $config_dir                            = $kafka::defaults::kafka_config_dir,
+
     $jmx_port                              = $kafka::defaults::jmx_port,
 
     $topic_whitelist                       = $kafka::defaults::topic_whitelist,
@@ -56,14 +58,14 @@ class kafka::mirror(
     # Make sure /etc/kafka/mirror is a directory.
     # MirrorMaker will read consumer and producer
     # properties files out of this directory.
-    file { '/etc/kafka/mirror':
+    file { "${config_dir}/mirror":
         ensure => 'directory',
     }
 
     # MirrorMaker will produce to this cluster
     # of Kafka Brokers.
     $brokers = $destination_brokers
-    file { '/etc/kafka/mirror/producer.properties':
+    file { "${config_dir}/mirror/producer.properties':
         content => template($producer_properties_template),
     }
 
@@ -78,7 +80,7 @@ class kafka::mirror(
     service { 'kafka-mirror':
         ensure     => $kafka_mirror_ensure,
         require    => [
-            File['/etc/kafka/mirror/producer.properties'],
+            File["${config_dir}/mirror/producer.properties"],
             File['/etc/default/kafka-mirror'],
         ],
         hasrestart => true,
